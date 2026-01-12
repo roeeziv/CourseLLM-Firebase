@@ -1,4 +1,4 @@
-import { File, FileArchive, FileAudio, FileImage, FileText, FileVideo, Presentation } from "lucide-react";
+import { File, FileArchive, FileAudio, FileText, FileVideo, Presentation,FileImage } from "lucide-react";
 import type { LucideProps } from "lucide-react";
 
 export function FileIcon({ fileType, ...props }: { fileType: string } & LucideProps) {

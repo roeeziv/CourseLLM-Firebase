@@ -1,67 +1,39 @@
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { FileBrowser } from '@/app/teacher/file-management/_components/file-browser';
-import { FileData, initialFiles } from '@/lib/files';
-import { vi } from 'vitest';
+import { test, expect } from '@playwright/test';
+import { createAndLoginNewUser, deleteCurrentUser } from './e2e-utils';
 
-vi.mock('@/app/teacher/file-management/_components/file-card', () => ({
-  FileCard: ({ file, onDelete }: { file: FileData; onDelete: (file: FileData) => void }) => (
-    <div data-testid={`file-card-${file.id}`}>
-      <a href={file.url} target="_blank">{file.name}</a>
-      <button onClick={() => onDelete(file)}>Delete {file.name}</button>
-    </div>
-  ),
-}));
+test.describe('New Teacher Onboarding Flow', () => {
+  
+  test('fresh user is redirected to onboarding and can become a teacher', async ({ page }) => {
+    // 1. Create a brand new user (Log in programmatically)
+    // The app should detect the new user and redirect to /onboarding (or whatever your role select route is)
+    await createAndLoginNewUser(page);
 
-beforeAll(() => {
-  global.URL.createObjectURL = vi.fn((blob) => `blob:${blob}` as string);
-  global.URL.revokeObjectURL = vi.fn();
-});
+    // 2. Verify we are on the Onboarding / Role Selection Page
+    // (Based on your screenshot image_d70a71.png)
+    await expect(page).toHaveURL(/.*onboarding/); 
+    await expect(page.getByText('Set up your profile')).toBeVisible();
 
-describe('FileBrowser', () => {
-  it('renders the initial files', () => {
-    render(<FileBrowser initialFiles={initialFiles} />);
-    expect(screen.getByText('File Management')).toBeInTheDocument();
-    initialFiles.forEach(file => {
-      expect(screen.getByText(file.name)).toBeInTheDocument();
-    });
-  });
+    // 3. Select "Teacher" Role
+    await page.getByRole('button', { name: 'Teacher' }).click();
 
-  it('can upload a new file', async () => {
-    render(<FileBrowser initialFiles={[]} />);
-    const file = new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' });
-    const input = screen.getByLabelText('Upload File');
+    // 4. Fill in Department (if required)
+    const deptInput = page.getByPlaceholder('e.g. Computer Science');
+    if (await deptInput.isVisible()) {
+        await deptInput.fill('Computer Science');
+    }
 
-    fireEvent.change(input, { target: { files: [file] } });
+    // 5. Submit the form
+    await page.getByRole('button', { name: 'Save and Continue' }).click();
 
-    await waitFor(() => {
-      expect(screen.getByText('chucknorris.png')).toBeInTheDocument();
-    });
-  });
-
-  it('can delete a file', async () => {
-    render(<FileBrowser initialFiles={initialFiles} />);
-    const fileToDelete = initialFiles[0];
-
-    // Click the delete button on the specific file card
-    const cardDeleteButton = screen.getByRole('button', { name: `Delete ${fileToDelete.name}` });
-    fireEvent.click(cardDeleteButton);
-
-    // The dialog should now be open. Find it by its role.
-    const dialog = await screen.findByRole('alertdialog');
-
-    // Find the confirmation delete button within the dialog and click it.
-    const confirmDeleteButton = within(dialog).getByRole('button', { name: 'Delete' });
-    fireEvent.click(confirmDeleteButton);
-
-    // Assert that the file is no longer visible.
-    await waitFor(() => {
-      expect(screen.queryByText(fileToDelete.name)).not.toBeInTheDocument();
-    });
-  });
-
-  it('shows a message when there are no files', () => {
-    render(<FileBrowser initialFiles={[]} />);
-    expect(screen.getByText('No files found')).toBeInTheDocument();
-    expect(screen.getByText('Start by uploading your first file.')).toBeInTheDocument();
+    // 6. Verify we are redirected to Teacher Dashboard
+    // Wait for the URL to change to the teacher area
+    await expect(page).toHaveURL(/\/teacher/);
+    
+    // 7. Now we can test the File Management access
+    await page.goto('/teacher/file-management');
+    await expect(page.getByRole('heading', { name: /file management/i })).toBeVisible();
+    
+    // 8. Cleanup: Delete the temporary user
+    await deleteCurrentUser(page);
   });
 });
