@@ -60,7 +60,7 @@ describe("FileBrowser", () => {
     mockUseRouter.mockReturnValue({ push: mockPush });
     
     // Mock URL object
-    global.URL.createObjectURL = jest.fn((file) => `blob:${file.name}`);
+    global.URL.createObjectURL = jest.fn((file) => `blob:${file}`);
     global.URL.revokeObjectURL = jest.fn();
   });
 

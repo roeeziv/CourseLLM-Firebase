@@ -19,7 +19,7 @@ export async function GET() {
     };
 
     return NextResponse.json(healthData);
-  } catch (error) {
+  } catch {
     return new NextResponse(
       JSON.stringify({ error: 'Failed to retrieve system information' }),
       { status: 500 }

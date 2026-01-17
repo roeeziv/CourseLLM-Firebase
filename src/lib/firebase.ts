@@ -1,12 +1,15 @@
 import { initializeApp } from "firebase/app";
-// 1. ADDED: signInWithCustomToken and createUserWithEmailAndPassword
 import { 
   getAuth, 
   GoogleAuthProvider, 
   connectAuthEmulator, 
 } from "firebase/auth";
 import { getApps, getApp } from "firebase/app";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { 
+  getFirestore, 
+  enableIndexedDbPersistence, 
+  connectFirestoreEmulator // 
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,22 +25,29 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// --- UPDATED EMULATOR LOGIC (SIMPLIFIED) ---
+// --- UPDATED EMULATOR LOGIC ---
 if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
   
-  // 1. Browser Environment: Connect to the APP URL (The Proxy handles the rest)
+  // 1. Browser Environment
   if (typeof window !== "undefined") {
     const appUrl = window.location.origin; 
     console.log(`🔥 Connecting to Auth Emulator via Proxy at: ${appUrl}`);
-    
-    // We connect to port 9002 (the app), and next.config.js forwards it to 9099
     connectAuthEmulator(auth, appUrl, { disableWarnings: true });
+
+    console.log(`🔥 Connecting to Firestore Emulator at 127.0.0.1:8080`);
+    // VS Code forwards port 8080 automatically, so localhost works even in Codespaces
+    connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    // 👆👆👆 END ADDITION 👆👆👆
   } 
   
-  // 2. Server Environment: Connect directly to localhost
+  // 2. Server Environment
   else {
     console.log(`🔥 Connecting to Auth Emulator (Server) at: http://127.0.0.1:9099`);
     connectAuthEmulator(auth, "http://127.0.0.1:9099");
+
+    console.log(`🔥 Connecting to Firestore Emulator (Server) at 127.0.0.1:8080`);
+    connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    // 👆👆👆 END ADDITION 👆👆👆
   }
 }
 // -------------------------------------------
@@ -45,7 +55,8 @@ if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
 // Persistence Logic
 try {
   enableIndexedDbPersistence(db).catch((err) => {
-    console.warn("Could not enable IndexedDB persistence:", err.code || err.message || err);
+    // It's normal for this to fail in some environments (like multiple tabs open)
+    console.warn("IndexedDB persistence warning:", err.code);
   });
 } catch (e) {
   console.warn("Persistence enable failed:", e);

@@ -9,11 +9,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "jest",
-    "test:watch": "jest --watch",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
-    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "postinstall": "patch-package",
     "emulator:start": "firebase emulators:start --import=./firebase-data --export-on-exit=./firebase-data",
     "dev:emulator": "NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true next dev -p 9002"

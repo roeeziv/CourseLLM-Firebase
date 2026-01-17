@@ -13,6 +13,7 @@ test-results/*
 *.last-run.json
 playwright-report/
 
+
 # testing
 /coverage
 
@@ -50,5 +51,8 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+firebase-data/
+ui-debug.log
 
+test-results/.last-run.json
 test-results/.last-run.json
