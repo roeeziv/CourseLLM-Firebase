@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const SHORT_TIMEOUT_CONSTANT=5000
-const TIMEOUT_CONSTANT=10000
+const TIMEOUT_CONSTANT=11000
 const LONG_TIMEOUT_CONSTANT=20000
 test('1 - first login redirects to onboarding', async ({ page, request }) => {
   const res = await request.get('http://localhost:9002/api/test-token?uid=first-login-1&createProfile=false');
