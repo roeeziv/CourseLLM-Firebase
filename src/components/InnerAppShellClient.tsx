@@ -3,7 +3,7 @@
 import React from "react";
 import { AppShell } from '@/components/layout/app-shell';
 import { useAuth } from '@/components/AuthProviderClient';
-import { LayoutDashboard, BookOpen, GraduationCap, Folder } from 'lucide-react';
+import { LayoutDashboard, BookOpen, GraduationCap, Folder, Shield } from 'lucide-react';
 
 type Props = { children: React.ReactNode; role?: "student" | "teacher" };
 
@@ -21,12 +21,14 @@ export default function InnerAppShellClient({ children, role = "student" }: Prop
     { href: '/student', label: 'Dashboard', icon: <LayoutDashboard /> },
     { href: '/student/courses', label: 'My Courses', icon: <BookOpen /> },
     { href: '/student/assessments', label: 'Assessments', icon: <GraduationCap /> },
+    { href: '/monitoring', label: 'Monitoring', icon: <Shield /> },
   ];
 
   const teacherNavItems = [
     { href: '/teacher', label: 'Dashboard', icon: <LayoutDashboard /> },
     { href: '/teacher/courses', label: 'Courses', icon: <BookOpen /> },
     { href: '/teacher/file-management', label: 'Manage Files', icon: <Folder /> },
+    { href: '/monitoring', label: 'Monitoring', icon: <Shield /> },
   ];
 
   const navItems = role === 'teacher' ? teacherNavItems : studentNavItems;
