@@ -12,6 +12,7 @@ This repository contains the `file-managment-ui-crud-llmexp` branch featuring th
 ### 1. Installation
 ```bash
 npm install
+```
 
 
 2. Environment Configuration
@@ -38,7 +39,7 @@ create .env.local with the firebase credentials I sent you.
 
 ```bash
 npm run dev
-
+```
 
 URL: http://localhost:9002
 
@@ -50,13 +51,13 @@ NEXT_PUBLIC_USE_FIREBASE_EMULATOR=true
 * Terminal 1 (Start Emulators):
 ```bash
 npm run emulator:start
-
+```
 Wait for "All emulators ready".
 
 * Terminal 2 (Start App):
 ```bash
 npm run dev:emulator
-
+```
 * URL: http://localhost:9002
 
 * Emulator UI: http://localhost:4000 (View Firestore/Auth data here)
@@ -78,18 +79,19 @@ We use Jest for unit tests and Playwright for E2E testing.
 * Unit Tests:
 ```bash
 npm run test
+```
 * End-to-End (E2E) Tests:
 ```bash
 npm run test:e2e
-
+```
 * Type Check:
-
+```bash
 npm run typecheck
-
+```
 * lint check:
 
 ```bash
 npm run lint
-
+```
 # monitoring:
 I added page in sidebar named monitoring that conatains all the data.

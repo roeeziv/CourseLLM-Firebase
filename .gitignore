@@ -55,4 +55,4 @@ firebase-data/
 ui-debug.log
 
 test-results/.last-run.json
-test-results/.last-run.json
+playwright-report/
