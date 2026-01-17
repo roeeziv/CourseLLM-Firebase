@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -42,23 +42,7 @@ export const AuthProviderClient: React.FC<{ children: React.ReactNode }> = ({ ch
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [onboardingRequired, setOnboardingRequired] = useState(false);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
-      setFirebaseUser(user);
-      if (user) {
-        await loadProfile(user.uid);
-      } else {
-        setProfile(null);
-        setOnboardingRequired(false);
-      }
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
-
-  async function loadProfile(uid: string): Promise<Profile | null> {
+const loadProfile = useCallback(async (uid: string) => {
     const docRef = doc(db, "users", uid);
     try {
       const snap = await getDoc(docRef);
@@ -89,7 +73,23 @@ export const AuthProviderClient: React.FC<{ children: React.ReactNode }> = ({ ch
       // Re-throw unexpected errors so they can be observed
       throw err;
     }
-  }
+  }, []);
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
+      setFirebaseUser(user);
+      if (user) {
+        await loadProfile(user.uid);
+      } else {
+        setProfile(null);
+        setOnboardingRequired(false);
+      }
+      setLoading(false);
+    });
+    return () => unsub();
+  }, [loadProfile]);
+
+
 
   function isProfileComplete(p: Profile | null | undefined) {
     if (!p) return false;

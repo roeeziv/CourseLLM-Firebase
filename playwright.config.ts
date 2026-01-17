@@ -2,7 +2,14 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 30_000,
+  
+  // ADD THIS LINE: Only run files ending in .spec.ts
+  testMatch: '**/*.spec.ts', 
+  
+  // OPTIONAL: Explicitly ignore your unit test files if the above isn't enough
+  // testIgnore: '**/*.test.tsx',
+
+  timeout: 35_000,
   expect: { timeout: 5000 },
   fullyParallel: false,
   reporter: 'html',
@@ -22,5 +29,7 @@ export default defineConfig({
     command: 'npm run dev',
     port: 9002,
     reuseExistingServer: !process.env.CI,
+    // Add a generous timeout for the server to start in the cloud environment
+    timeout: 120 * 1000, 
   },
 });

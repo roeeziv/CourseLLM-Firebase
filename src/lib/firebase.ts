@@ -1,6 +1,15 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  connectAuthEmulator, 
+} from "firebase/auth";
+import { getApps, getApp } from "firebase/app";
+import { 
+  getFirestore, 
+  enableIndexedDbPersistence, 
+  connectFirestoreEmulator // 
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,21 +20,45 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Enable offline persistence so reads can be served from cache when offline.
-// This is a best-effort call: it will fail in some environments (e.g. Safari private mode)
-// and when multiple tabs conflict. We catch and ignore expected errors.
+// --- UPDATED EMULATOR LOGIC ---
+if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+  
+  // 1. Browser Environment
+  if (typeof window !== "undefined") {
+    const appUrl = window.location.origin; 
+    console.log(`🔥 Connecting to Auth Emulator via Proxy at: ${appUrl}`);
+    connectAuthEmulator(auth, appUrl, { disableWarnings: true });
+
+    console.log(`🔥 Connecting to Firestore Emulator at 127.0.0.1:8080`);
+    // VS Code forwards port 8080 automatically, so localhost works even in Codespaces
+    connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    // 👆👆👆 END ADDITION 👆👆👆
+  } 
+  
+  // 2. Server Environment
+  else {
+    console.log(`🔥 Connecting to Auth Emulator (Server) at: http://127.0.0.1:9099`);
+    connectAuthEmulator(auth, "http://127.0.0.1:9099");
+
+    console.log(`🔥 Connecting to Firestore Emulator (Server) at 127.0.0.1:8080`);
+    connectFirestoreEmulator(db, '127.0.0.1', 8080);
+    // 👆👆👆 END ADDITION 👆👆👆
+  }
+}
+// -------------------------------------------
+
+// Persistence Logic
 try {
   enableIndexedDbPersistence(db).catch((err) => {
-    // failed-precondition: multiple tabs open, unimplemented: browser not supported
-    console.warn("Could not enable IndexedDB persistence:", err.code || err.message || err);
+    // It's normal for this to fail in some environments (like multiple tabs open)
+    console.warn("IndexedDB persistence warning:", err.code);
   });
 } catch (e) {
-  // Ignore synchronous errors
   console.warn("Persistence enable failed:", e);
 }
 

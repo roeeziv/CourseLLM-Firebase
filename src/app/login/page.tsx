@@ -3,50 +3,39 @@
 import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/AuthProviderClient"
-import { auth } from "@/lib/firebase"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { LogIn, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const { signInWithGoogle, loading, firebaseUser, refreshProfile, profile } = useAuth()
+  const { signInWithGoogle, loading, firebaseUser, refreshProfile } = useAuth()
   const [navigating, setNavigating] = useState(false)
   const router = useRouter()
-
-  const gotoAfterAuth = async () => {
-    // Fast path: if profile already in memory use it
-    if (profile && profile.role) return router.replace(profile.role === "teacher" ? "/teacher" : "/student")
-
-    // Otherwise try to refresh but don't wait long — race against a short timeout
-    const refreshPromise = refreshProfile()
-    const res = await Promise.race([
-      refreshPromise,
-      new Promise<null>((r) => setTimeout(() => r(null), 700)),
-    ])
-
-    if (res && (res as any).role) return router.replace((res as any).role === "teacher" ? "/teacher" : "/student")
-
-    // Fallback: optimistic default. RoleGuard will correct if needed.
-    return router.replace("/student")
-  }
 
   const handleGoogle = async () => {
     try {
       setNavigating(true)
       await signInWithGoogle()
-      // If this is the user's first sign-in, send them to onboarding immediately.
-      const user = auth.currentUser
-      const isNew = !!(user && user.metadata && user.metadata.creationTime === user.metadata.lastSignInTime)
-      if (isNew) return router.replace("/onboarding")
 
-      await gotoAfterAuth()
+      // 1. Attempt to fetch the latest profile from your DB
+      const userProfile = await refreshProfile()
+
+      // 2. Check if the profile actually exists and has a role
+      if (userProfile && (userProfile as any).role) {
+         // User exists in DB -> Send to Dashboard
+         const role = (userProfile as any).role
+         return router.replace(role === "teacher" ? "/teacher" : "/student")
+      }
+
+      // 3. If no profile was found, they are a "New User" to your app
+      // irrespective of when their Google account was created.
+      return router.replace("/onboarding")
+
     } catch (err) {
       setNavigating(false)
-      console.error(err)
+      console.error("Login failed:", err)
     }
   }
-
-  // Note: GitHub sign-in removed — only Google sign-in is supported.
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -54,7 +43,7 @@ export default function LoginPage() {
         <Card>
         <CardHeader>
           <CardTitle>Sign in to CourseLLM</CardTitle>
-          <CardDescription>Sign in with Google to continue — we'll only store the info needed for your profile.</CardDescription>
+          <CardDescription>Sign in with Google to continue — we will only store the info needed for your profile.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-3">
@@ -74,7 +63,7 @@ export default function LoginPage() {
               <div className="rounded-lg bg-card p-6 shadow-lg text-center">
                 <Loader2 className="mx-auto mb-4 animate-spin" />
                 <div className="text-lg font-medium">Signing you in…</div>
-                <div className="text-sm text-muted-foreground mt-1">We&apos;re taking you to your dashboard.</div>
+                <div className="text-sm text-muted-foreground mt-1">Checking your profile...</div>
               </div>
             </div>
           </div>

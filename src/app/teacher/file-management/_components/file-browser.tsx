@@ -58,21 +58,28 @@ export function FileBrowser({ initialFiles = defaultInitialFiles }: { initialFil
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      const newFile: FileData = {
-        id: Date.now().toString(),
-        name: file.name,
-        type: file.name.split(".").pop() || "file",
-        size: `${(file.size / 1024).toFixed(2)} KB`,
-        date: new Date().toLocaleDateString(),
-        url: url,
-      };
-      setFiles((prev) => [newFile, ...prev]);
-      setObjectUrls(prev => ({...prev, [newFile.id]: url}));
+      try {
+        // Wrap error-prone logic in try/catch
+        const url = URL.createObjectURL(file);
+        const newFile: FileData = {
+          id: Date.now().toString(),
+          name: file.name,
+          type: file.name.split(".").pop() || "file",
+          size: `${(file.size / 1024).toFixed(2)} KB`,
+          date: new Date().toLocaleDateString(),
+          url: url,
+        };
+        setFiles((prev) => [newFile, ...prev]);
+        setObjectUrls((prev) => ({ ...prev, [newFile.id]: url }));
+      } catch (error) {
+        console.error("File upload failed:", error);
+        // Optional: You can add an alert or toast here
+        // alert("Failed to upload file"); 
+      }
     }
     // Reset file input
-    if(event.target) {
-        event.target.value = "";
+    if (event.target) {
+      event.target.value = "";
     }
   };
 
@@ -109,6 +116,7 @@ export function FileBrowser({ initialFiles = defaultInitialFiles }: { initialFil
           onChange={handleFileChange}
           className="hidden"
           aria-label="Upload File"
+          data-testid="upload-input"
         />
       </div>
 
