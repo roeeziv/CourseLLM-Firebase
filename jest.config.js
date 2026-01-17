@@ -1,17 +1,25 @@
-require('dotenv').config({ path: '.env.test' });
+const nextJest = require('next/jest')
 
-module.exports = {
-    testEnvironment: "jsdom",
-    transform: {
-      "^.+\\.tsx?$": "babel-jest",
-    },
-    moduleNameMapper: {
-      "^@/(.*)$": "<rootDir>/src/$1",
-      "lucide-react": "<rootDir>/tests/mocks/lucide-react.js"
-    },
-    setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
-    testMatch: [
-        "**/?(*.)+(test).[jt]s?(x)"
-    ]
-  };
+const createJestConfig = nextJest({
+  // Provide the path to your Next.js app to load next.config.js and .env files
+  dir: './',
+})
+
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   
+  // Handle the "@/" alias imports
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  
+  testEnvironment: 'jest-environment-jsdom',
+
+  // ⛔️ CRITICAL: Ignore Playwright E2E tests
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/tests/.*\\.spec\\.ts$' 
+  ],
+}
+
+module.exports = createJestConfig(customJestConfig)

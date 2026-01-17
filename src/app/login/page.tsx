@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { LogIn, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const { signInWithGoogle, loading, firebaseUser, refreshProfile, profile } = useAuth()
+  const { signInWithGoogle, loading, firebaseUser, refreshProfile } = useAuth()
   const [navigating, setNavigating] = useState(false)
   const router = useRouter()
 
@@ -43,7 +43,7 @@ export default function LoginPage() {
         <Card>
         <CardHeader>
           <CardTitle>Sign in to CourseLLM</CardTitle>
-          <CardDescription>Sign in with Google to continue — we'll only store the info needed for your profile.</CardDescription>
+          <CardDescription>Sign in with Google to continue — we will only store the info needed for your profile.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-3">

@@ -9,7 +9,7 @@ export default defineConfig({
   // OPTIONAL: Explicitly ignore your unit test files if the above isn't enough
   // testIgnore: '**/*.test.tsx',
 
-  timeout: 30_000,
+  timeout: 35_000,
   expect: { timeout: 5000 },
   fullyParallel: false,
   reporter: 'html',

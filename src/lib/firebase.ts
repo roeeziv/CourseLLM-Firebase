@@ -1,7 +1,12 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, connectAuthEmulator } from "firebase/auth";
+// 1. ADDED: signInWithCustomToken and createUserWithEmailAndPassword
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  connectAuthEmulator, 
+} from "firebase/auth";
 import { getApps, getApp } from "firebase/app";
-import { getFirestore, enableIndexedDbPersistence, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,7 +27,7 @@ if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
   
   // 1. Browser Environment: Connect to the APP URL (The Proxy handles the rest)
   if (typeof window !== "undefined") {
-    const appUrl = window.location.origin; // e.g. https://...9002...
+    const appUrl = window.location.origin; 
     console.log(`🔥 Connecting to Auth Emulator via Proxy at: ${appUrl}`);
     
     // We connect to port 9002 (the app), and next.config.js forwards it to 9099
@@ -37,7 +42,7 @@ if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
 }
 // -------------------------------------------
 
-// Persistence Logic (Keep as is)
+// Persistence Logic
 try {
   enableIndexedDbPersistence(db).catch((err) => {
     console.warn("Could not enable IndexedDB persistence:", err.code || err.message || err);

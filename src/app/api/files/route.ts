@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
           "Content-Type": "application/octet-stream",
         },
       });
-    } catch (error) {
+    } catch {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
   }
@@ -52,7 +52,7 @@ export async function DELETE(request: NextRequest) {
     try {
       await fs.unlink(filePath);
       return NextResponse.json({ success: true });
-    } catch (error) {
+    } catch {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
   }

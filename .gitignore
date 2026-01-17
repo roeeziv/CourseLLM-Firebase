@@ -9,6 +9,9 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+test-results/*
+*.last-run.json
+playwright-report/
 
 # testing
 /coverage
@@ -47,3 +50,4 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
